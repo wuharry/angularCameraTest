@@ -1,7 +1,7 @@
 import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { FormsModule } from '@angular/forms'; // ✅ 加入 FormsModule
-import { CommonModule } from '@angular/common'; // ✅ 加入 CommonModule
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 interface CustomMediaTrackConstraintSet extends MediaTrackConstraintSet {
   zoom?: number;
@@ -10,7 +10,7 @@ interface CustomMediaTrackConstraintSet extends MediaTrackConstraintSet {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, FormsModule, CommonModule], // ✅ 確保有 CommonModule
+  imports: [RouterOutlet, FormsModule, CommonModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
@@ -23,7 +23,6 @@ export class AppComponent implements AfterViewInit {
   zoomStep = 0.1;
 
   ngAfterViewInit() {
-    // ✅ 延遲啟動相機，確保 DOM 加載完成
     setTimeout(() => {
       console.log("📷 Video element:", this.videoElement);
       if (!this.videoElement) {
@@ -31,7 +30,7 @@ export class AppComponent implements AfterViewInit {
         return;
       }
       this.startCamera();
-    }, 100);
+    }, 500);
   }
 
   async startCamera() {
@@ -48,18 +47,17 @@ export class AppComponent implements AfterViewInit {
         return;
       }
 
-      // ✅ 開啟相機
       this.stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' } // 後鏡頭
+        video: { facingMode: 'environment' } // 使用後鏡頭
       });
 
-      const video = this.videoElement.nativeElement as HTMLVideoElement;
+      const video: HTMLVideoElement = this.videoElement.nativeElement;
       video.srcObject = this.stream;
       video.play();
 
-      // ✅ 檢查裝置是否支援變焦
+      // ✅ 確認裝置是否支援變焦
       const track = this.stream.getVideoTracks()[0];
-      const capabilities = track.getCapabilities() as any; 
+      const capabilities = track.getCapabilities() as any; // 讓 TypeScript 忽略類型檢查
       console.log("📷 Camera capabilities:", capabilities);
 
       if (capabilities.zoom) {
@@ -69,7 +67,6 @@ export class AppComponent implements AfterViewInit {
       } else {
         console.warn('❌ Zoom is not supported on this device.');
       }
-
     } catch (err) {
       console.error('⚠️ 無法存取相機:', err);
       alert('❌ 請允許相機權限，或使用支援相機的瀏覽器！');
@@ -79,9 +76,11 @@ export class AppComponent implements AfterViewInit {
   adjustZoom(zoomValue: number) {
     if (this.stream) {
       const track = this.stream.getVideoTracks()[0];
-      track.applyConstraints({
-        advanced: [{ zoom: zoomValue }]
-      }).then(() => console.log(`🔍 Zoom set to ${zoomValue}`))
+      track
+        .applyConstraints({
+          advanced: [{ zoom: zoomValue }] as CustomMediaTrackConstraintSet[],
+        })
+        .then(() => console.log(`🔍 Zoom set to ${zoomValue}`))
         .catch((err) => console.error('❌ Zoom adjustment failed', err));
     }
   }
