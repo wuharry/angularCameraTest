@@ -1,19 +1,19 @@
 import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
-  import { RouterOutlet } from '@angular/router';
-  import { FormsModule } from '@angular/forms'; // ✅ 加入 FormsModule
-  import { CommonModule } from '@angular/common'; // ✅ 加入 CommonModule
+import { RouterOutlet } from '@angular/router';
+import { FormsModule } from '@angular/forms'; // ✅ 加入 FormsModule
+import { CommonModule } from '@angular/common'; // ✅ 加入 CommonModule
 
-  interface CustomMediaTrackConstraintSet extends MediaTrackConstraintSet {
-    zoom?: number;
-  }
+interface CustomMediaTrackConstraintSet extends MediaTrackConstraintSet {
+  zoom?: number;
+}
 
-  @Component({
-    selector: 'app-root',
-    standalone: true, // ✅ 必須是 Standalone Component
-    imports: [RouterOutlet, FormsModule, CommonModule], // ✅ 確保有 CommonModule
-    templateUrl: './app.component.html',
-    styleUrl: './app.component.css',
-  })
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [RouterOutlet, FormsModule, CommonModule], // ✅ 確保有 CommonModule
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.css',
+})
   export class AppComponent implements AfterViewInit {
     @ViewChild('videoElement', { static: false }) videoElement!: ElementRef;
     stream: MediaStream | null = null;
@@ -22,38 +22,52 @@ import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
     minZoom = 1; // 最小變焦倍率
     zoomStep = 0.1; // 變焦調整的步長
     ngAfterViewInit() {
-      console.log("Video element:", this.videoElement);
+     // ✅ 延遲啟動相機，確保 DOM 加載完成
+     setTimeout(() => {
+      console.log("📷 Video element:", this.videoElement);
+      if (!this.videoElement) {
+        console.error("❌ `videoElement` 未找到，請確保 HTML 正確！");
+        return;
+      }
       this.startCamera();
+    }, 100);
     }
 
     async startCamera() {
       try {
         if (!this.videoElement || !this.videoElement.nativeElement) {
-          console.error('Video element not found!');
+          console.error('❌ `videoElement` 為 null，請檢查 HTML 是否正確！');
+          alert('⚠️ 請確保網站在 HTTPS 下運行，並允許相機權限！');
           return;
         }
-        this.stream = await navigator.mediaDevices.getUserMedia({ video: true });
+       // ✅ 確保使用 HTTPS，否則提醒用戶
+       if (location.protocol !== 'https:') {
+        alert("⚠️ 請使用 HTTPS 以啟動相機功能！");
+        return;
+      }
+      
+      this.stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' } // 後鏡頭
+      });
         const video: HTMLVideoElement = this.videoElement.nativeElement;
-        video.srcObject = this.stream;
-        video.play();
-
-        
-        // 嘗試獲取變焦能力      // 檢查裝置是否支持變焦
-
-        const track = this.stream.getVideoTracks()[0];
-        const capabilities = track.getCapabilities() as any; // 讓 TypeScript 忽略類型檢查
-        console.log("Camera capabilities:", capabilities);
-
+          video.srcObject = this.stream;
+          video.play();
+               // ✅ 檢查裝置是否支援變焦
+          const track = this.stream.getVideoTracks()[0];
+          const capabilities = track.getCapabilities() as any; // 讓 TypeScript 忽略類型檢查
+          console.log("Camera capabilities:", capabilities);
+          
         if (capabilities.zoom) {
           this.zoomLevel = capabilities.zoom.min || 1;
           this.minZoom = capabilities.zoom.min || 1;
           this.maxZoom = capabilities.zoom.max || 3;
         } else {
-          console.warn('Zoom is not supported on this device.');
-        }
+          console.warn('❌ Zoom is not supported on this device.');
+        }     
+
       } catch (err) {
-        console.error('Error accessing camera', err);
-      }
+        console.error('⚠️ 無法存取相機:', err);
+        alert('❌ 請允許相機權限，或使用支援相機的瀏覽器！');      }
     }
 
     adjustZoom(zoomValue: number) {
@@ -63,8 +77,8 @@ import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
           .applyConstraints({
             advanced: [{ zoom: zoomValue }] as CustomMediaTrackConstraintSet[],
           })
-          .then(() => console.log(`Zoom set to ${zoomValue}`))
-          .catch((err) => console.error('Zoom adjustment failed', err));
+          .then(() => console.log(`🔍 Zoom set to ${zoomValue}`))
+        .catch((err) => console.error('❌ Zoom adjustment failed', err));
       }
     }
 
