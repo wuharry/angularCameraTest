@@ -38,19 +38,15 @@
     --gray-700: oklch(36.98% 0.014 302.71);
     --gray-400: oklch(70.9% 0.015 304.04);
 
-    --red-to-pink-to-purple-vertical-gradient: linear-gradient(
-      180deg,
-      var(--orange-red) 0%,
-      var(--vivid-pink) 50%,
-      var(--electric-violet) 100%
-    );
+    --red-to-pink-to-purple-vertical-gradient: linear-gradient(180deg,
+        var(--orange-red) 0%,
+        var(--vivid-pink) 50%,
+        var(--electric-violet) 100%);
 
-    --red-to-pink-to-purple-horizontal-gradient: linear-gradient(
-      90deg,
-      var(--orange-red) 0%,
-      var(--vivid-pink) 50%,
-      var(--electric-violet) 100%
-    );
+    --red-to-pink-to-purple-horizontal-gradient: linear-gradient(90deg,
+        var(--orange-red) 0%,
+        var(--vivid-pink) 50%,
+        var(--electric-violet) 100%);
 
     --pill-accent: var(--bright-blue);
 
@@ -151,9 +147,11 @@
   .pill-group .pill:nth-child(6n + 1) {
     --pill-accent: var(--bright-blue);
   }
+
   .pill-group .pill:nth-child(6n + 2) {
     --pill-accent: var(--french-violet);
   }
+
   .pill-group .pill:nth-child(6n + 3),
   .pill-group .pill:nth-child(6n + 4),
   .pill-group .pill:nth-child(6n + 5) {
@@ -198,12 +196,7 @@
 <main class="main">
   <div class="content">
     <div class="left-side">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 982 239"
-        fill="none"
-        class="angular-logo"
-      >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 982 239" fill="none" class="angular-logo">
         <!-- 略去 SVG 內容 -->
       </svg>
       <h1>Hello</h1>
@@ -217,21 +210,15 @@
 
         <div *ngIf="stream">
           <label for="zoomRange">調整變焦：</label>
-          <input
-            id="zoomRange"
-            type="range"
-            min="1"
-            max="3"
-            step="0.1"
-            [(ngModel)]="zoomLevel"
-            (input)="adjustZoom(zoomLevel)"
-          />
+          <input id="zoomRange" type="range" [min]="minZoom" [max]="maxZoom" [step]="zoomStep" [(ngModel)]="zoomLevel"
+            (input)="adjustZoom(zoomLevel)" />
           <div class="zoom-buttons">
             <button (click)="increaseZoom()">+</button>
             <button (click)="decreaseZoom()">-</button>
           </div>
         </div>
       </div>
+
       <!-- ✅ 相機功能結束 -->
     </div>
   </div>
