@@ -1,6 +1,6 @@
 
 export default {
-  basePath: '/demo1',
+  basePath: '/angularCameraTest',
   supportedLocales: {
   "en-US": ""
 },
